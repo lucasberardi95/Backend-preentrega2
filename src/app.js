@@ -36,8 +36,8 @@ mongoose.connect(process.env.MONGO_URL)
         /* const results = await productModel.paginate({ status: 'true' }, { page: 1, sort: {price:'desc'} })
         console.log(results) */
         //await cartModel.create({})
-        /* const cart = await cartModel.findOne({_id: '650135653bba0ce0308d0bc2'})
-        console.log(JSON.stringify(cart)) */
+        const cart = await cartModel.find()
+        console.log(JSON.stringify(cart))
         /* await orderModel.create([
             {name:'Napotilana', size:'medium', price:'2000', quantity:'5'},
             {name:'4 quesos', size:'medium', price:'3000', quantity:'3'},
