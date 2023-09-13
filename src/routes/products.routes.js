@@ -8,9 +8,9 @@ productRouter.get('/', async (req, res) => {
 
     limit = limit ? parseInt(limit) : 10
     page = page ? parseInt(page) : 1
-    let sortOption;
-    sort === 'asc' && (sortOption = 'price');
-    sort === 'desc' && (sortOption = '-price');
+    let sortOption
+    sort === 'asc' && (sortOption = 'price')
+    sort === 'desc' && (sortOption = '-price')
     try {
         const options = {
             limit: limit,
