@@ -36,6 +36,33 @@ cartRouter.post('/', async (req, res) => {
 
 })
 
+cartRouter.put('/:cid', async (req, res) => {
+    const { cid } = req.params
+    const { pid, quantity } = req.body
+    try {
+        const cart = await cartModel.findById(cid)
+        if (!cart) {
+            res.status(404).send({ error: `Cart not found: ${error}` })
+            return
+        }
+        const productId = new mongoose.Types.ObjectId(pid)
+        let productFound = false
+        cart.products.forEach((product) => {
+            if (product.id_prod.equals(productId)) {
+                product.quantity += quantity
+                productFound = true
+            }
+        })
+        if (!productFound) {
+            cart.products.push({ id_prod: pid, quantity })
+        }
+        await cart.save()
+        res.status(200).send({ result: 'OK', cart })
+    } catch (error) {
+        res.status(200).send({ error: `Error updating cart: ${error}` })
+    }
+})
+
 cartRouter.put('/:cid/product/:pid', async (req, res) => {
     const { cid, pid } = req.params
     const { quantity } = req.body
@@ -58,20 +85,20 @@ cartRouter.delete('/:cid/products/:pid', async (req, res) => {
         if (cart) {
             const productIndex = cart.products.findIndex(prod => prod.id_prod.equals(new mongoose.Types.ObjectId(pid)))
             let deletedProduct
-			if (productIndex !== -1) {
-				deletedProduct = cart.products[productIndex]
-				cart.products.splice(productIndex, 1)
-			} else {
-				res.status(404).send({ result: 'Id Product Not Found', message: cart })
-			}
-			await cart.save()
-			res.status(200).send({ result: 'OK', message: deletedProduct })
-		} else {
-			res.status(404).send({ result: 'Cart Not Found', message: cart })
-		}
-	} catch (error) {
-		res.status(400).send({ error: `Error deleting product: ${error}` })
-	}
+            if (productIndex !== -1) {
+                deletedProduct = cart.products[productIndex]
+                cart.products.splice(productIndex, 1)
+            } else {
+                res.status(404).send({ result: 'Id Product Not Found', message: cart })
+            }
+            await cart.save()
+            res.status(200).send({ result: 'OK', message: deletedProduct })
+        } else {
+            res.status(404).send({ result: 'Cart Not Found', message: cart })
+        }
+    } catch (error) {
+        res.status(400).send({ error: `Error deleting product: ${error}` })
+    }
 })
 
 cartRouter.delete('/:id', async (req, res) => {
