@@ -103,11 +103,17 @@ cartRouter.delete('/:cid/products/:pid', async (req, res) => {
 
 cartRouter.delete('/:id', async (req, res) => {
     const { id } = req.params
-    const response = await cartModel.deleteOne({ _id: id })
-    if (response)
-        res.status(200).send({ result: 'OK ', message: response })
-    else
-        res.status(404).send({ error: `Id cart not found: ${error}` })
+    try {
+        const cart = await cartModel.findById(id)
+        if (!cart) {
+            res.status(404).send({ result: 'Cart not found', message: cart})
+        }
+        cart.products = []
+        await cart.save()
+        res.status(200).send({ result: 'OK', message: cart})
+    } catch (error) {
+        res.status(400).send({ error: `Error empitying cart: ${cart}`})
+    }
 })
 
 export default cartRouter
