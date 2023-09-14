@@ -76,6 +76,30 @@ cartRouter.put('/:cid/product/:pid', async (req, res) => {
     }
 })
 
+cartRouter.put('/:cid/products/:pid', async (req, res) => {
+    const { cid, pid } = req.params
+    const { quantity } = req.body
+    try {
+        const cart = await cartModel.findById(cid)
+        if (!cart) {
+            res.status(404).send({ result: `Id cart not found` })
+            return
+        }
+        const existingProduct = cart.products.find((prod) =>
+            prod.id_prod.equals(pid)
+        )
+        if (!existingProduct) {
+            res.status(404).send({ result: `Product not found in cart` })
+            return
+        }
+        existingProduct.quantity += quantity
+        await cart.save()
+        res.status(200).send({ result: 'OK', cart })
+    } catch (error) {
+        res.status(400).send({ error: `Error updating product qty: ${error}` })
+    }
+})
+
 cartRouter.delete('/:cid/products/:pid', async (req, res) => {
     const { cid, pid } = req.params
     try {
