@@ -38,24 +38,22 @@ cartRouter.post('/', async (req, res) => {
 
 cartRouter.put('/:cid', async (req, res) => {
     const { cid } = req.params
-    const { pid, quantity } = req.body
+    const arrayProds = req.body
     try {
         const cart = await cartModel.findById(cid)
         if (!cart) {
             res.status(404).send({ error: `Cart not found: ${error}` })
             return
         }
-        const productId = new mongoose.Types.ObjectId(pid)
-        let productFound = false
-        cart.products.forEach((product) => {
-            if (product.id_prod.equals(productId)) {
-                product.quantity += quantity
-                productFound = true
-            }
+        arrayProds.forEach(async (productData) => {
+            const { id_prod, quantity } = productData
+            const existingProduct = cart.products.find((product) =>
+                product.id_prod.equals(id_prod)
+            )
+            existingProduct
+                ? (existingProduct.quantity += quantity)
+                : cart.products.push({ id_prod, quantity })
         })
-        if (!productFound) {
-            cart.products.push({ id_prod: pid, quantity })
-        }
         await cart.save()
         res.status(200).send({ result: 'OK', cart })
     } catch (error) {
@@ -106,13 +104,13 @@ cartRouter.delete('/:id', async (req, res) => {
     try {
         const cart = await cartModel.findById(id)
         if (!cart) {
-            res.status(404).send({ result: 'Cart not found', message: cart})
+            res.status(404).send({ result: 'Cart not found', message: cart })
         }
         cart.products = []
         await cart.save()
-        res.status(200).send({ result: 'OK', message: cart})
+        res.status(200).send({ result: 'OK', message: cart })
     } catch (error) {
-        res.status(400).send({ error: `Error empitying cart: ${cart}`})
+        res.status(400).send({ error: `Error empitying cart: ${cart}` })
     }
 })
 
